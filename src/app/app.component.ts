@@ -1,8 +1,12 @@
 import {Component, OnInit} from '@angular/core';
-import {select, Store} from "@ngrx/store";
-import {Observable} from "rxjs";
+import {select, Store} from '@ngrx/store';
+import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router} from '@angular/router';
+import {AuthState} from './auth/reducers';
+import {logout} from './auth/auth.actions';
+import {AuthService} from './auth/auth.service';
+import {isLoggedIn, isLoggedOut} from './auth/auth.selectors';
 
 @Component({
   selector: 'app-root',
@@ -11,37 +15,50 @@ import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Route
 })
 export class AppComponent implements OnInit {
 
-    loading = true;
+  loading = true;
+  isLoggedIn$: Observable<boolean>;
+  isLoggedOut$: Observable<boolean>;
 
-    constructor(private router: Router) {
+  constructor(private router: Router,
+              private store: Store<AuthState>) {
 
-    }
+  }
 
-    ngOnInit() {
+  ngOnInit() {
 
-      this.router.events.subscribe(event  => {
-        switch (true) {
-          case event instanceof NavigationStart: {
-            this.loading = true;
-            break;
-          }
-
-          case event instanceof NavigationEnd:
-          case event instanceof NavigationCancel:
-          case event instanceof NavigationError: {
-            this.loading = false;
-            break;
-          }
-          default: {
-            break;
-          }
+    this.router.events.subscribe(event => {
+      switch (true) {
+        case event instanceof NavigationStart: {
+          this.loading = true;
+          break;
         }
-      });
 
-    }
+        case event instanceof NavigationEnd:
+        case event instanceof NavigationCancel:
+        case event instanceof NavigationError: {
+          this.loading = false;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    });
 
-    logout() {
 
-    }
+    this.isLoggedIn$ = this.store.pipe(
+      select(isLoggedIn)
+    );
+
+    this.isLoggedOut$ = this.store.pipe(
+      select(isLoggedOut)
+    );
+
+  }
+
+  logout() {
+    this.store.dispatch(logout());
+
+  }
 
 }

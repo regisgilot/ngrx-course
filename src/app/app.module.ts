@@ -20,20 +20,21 @@ import {RouterState, StoreRouterConnectingModule} from '@ngrx/router-store';
 
 import {EffectsModule} from '@ngrx/effects';
 import {EntityDataModule} from '@ngrx/data';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {AuthGuard} from './auth/auth.guard';
 
 
 const routes: Routes = [
   {
     path: 'courses',
-    loadChildren: () => import('./courses/courses.module').then(m => m.CoursesModule)
+    loadChildren: () => import('./courses/courses.module').then(m => m.CoursesModule),
+    canActivate: [AuthGuard]
   },
   {
     path: '**',
     redirectTo: '/'
   }
 ];
-
 
 
 @NgModule({
@@ -43,7 +44,7 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(routes, {relativeLinkResolution: 'legacy'}),
     HttpClientModule,
     MatMenuModule,
     MatIconModule,
@@ -51,7 +52,10 @@ const routes: Routes = [
     MatProgressSpinnerModule,
     MatListModule,
     MatToolbarModule,
-    AuthModule.forRoot()
+    AuthModule.forRoot(),
+    StoreModule.forRoot({}, {}),
+    StoreDevtoolsModule.instrument({maxAge: 25, logOnly: environment.production}),
+    EffectsModule.forRoot([])
   ],
   bootstrap: [AppComponent]
 })
